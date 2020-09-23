@@ -1,10 +1,13 @@
+import random
+
 class PicrossBoard:
     
     def __init__(self, size, **kwargs):
+        
         self.size = size
-        row = [0]*size
-        self.board = [row for i in range(size)]
+        self.board = self._generate_blank_board()
         self.row_segments = None
+        self.col_segments = None
         
         if 'row_segment' in kwargs.keys():
             self.row_segments = kwargs['row_segments']
@@ -36,6 +39,73 @@ class PicrossBoard:
                 return False
         
         return True
+    
+    def generate_valid_puzzle(self, seed=None):
+        """Generate a picross puzzle whose solution is valid."""
+        
+        if seed is not None:
+            random.seed(seed)
+        else:
+            random.seed()
+            
+        board = self._generate_blank_board()
+        for row in range(self.size):
+            for col in range(self.size):
+                if random.random() >= 0.5:
+                    board[row][col] = 1
+                else:
+                    board[row][col] = 0
+                    
+        self.col_segments = self._generate_column_segments()
+        self.row_segments = self._generate_row_segments()
+        
+        return board
+        
+    def _generate_column_segments(self):
+        
+        col_segments = []
+        
+        row = 0
+        for col in range(self.size):
+            this_col = []
+            while row < self.size:
+                if self.board[row][col] != 0:
+                    length, col = self._traverse_col_segment(col, row)
+                    this_col.append(length)
+                row+=1
+            if len(col_segments) == 0:
+                this_col.append(0)
+            col_segments.append(this_col)
+            
+        return col_segments
+        
+        
+    def _generate_row_segments(self):
+        
+        row_segments = []
+        
+        col = 0
+        for row in range(self.size):
+            this_row = []
+            while col < self.size:
+                if self.board[row][col] != 0:
+                    length, col = self._traverse_row_segment(row, col)
+                    this_row.append(length)
+                col+=1
+            if len(this_row)==0:
+                this_row.append(0)
+            row_segments.append(0)
+            
+        return row_segments
+    
+    def _generate_blank_board(self):
+        
+        board = []
+        for i in range(self.size):
+            row = [0]*self.size
+            board.append(row)
+            
+        return board
         
     def _row_solved(self, row):
         """Check to see if a given row is solved based on the rows segments."""
@@ -134,6 +204,13 @@ if __name__ == "__main__":
     board.set_state(solution)
     assert board.solved() == False
     print('Tes 2 passed.')
+    
+    print('Starting test 3...')
+    solution = [[1, 1],
+                [0, 0]]
+    new_board = board.generate_valid_puzzle(0)
+    assert new_board == solution
+    print('Test 3 passed.')
     
     
         
