@@ -180,38 +180,3 @@ class PicrossBoard:
                 break
             
         return (length, index - 1)
-        
-if __name__ == "__main__":
-    #add tests
-    
-    board = PicrossBoard(2)
-    row_segments = [[1], [0]]
-    col_segments = [[1], [0]]
-
-    board.set_row_segments(row_segments)
-    board.set_col_segments(col_segments)
-    
-    print('Starting test 1...')
-    solution = [[1, 0],
-                [0, 0]]
-    board.set_state(solution)
-    assert board.solved() == True
-    print('Test 1 passed.')
-    
-    print('Starting test 2...')
-    solution = [[1, 0],
-                [0, 1]]
-    board.set_state(solution)
-    assert board.solved() == False
-    print('Tes 2 passed.')
-    
-    print('Starting test 3...')
-    solution = [[1, 1],
-                [0, 0]]
-    new_board = board.generate_valid_puzzle(0)
-    assert new_board == solution
-    print('Test 3 passed.')
-    
-    
-        
-        
