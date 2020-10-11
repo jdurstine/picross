@@ -15,6 +15,29 @@ class PicrossBoard:
         if 'col_segments' in kwargs.keys():
             self.col_segments = kwargs['col_segments']
             
+    def __getitem__(self, key):
+        
+        row = key[0]
+        self._key_check(row)
+        
+        col = key[1]
+        self._key_check(col)
+        
+        return self.board[row][col]
+        
+    def __setitem__(self, key, value):
+        
+        row = key[0]
+        self._key_check(row)
+        
+        col = key[1]
+        self._key_check(col)
+        
+        if value not in [-1, 0, 1]:
+            raise ValueError('Board cell must be one of -1, 0 or 1.')
+            
+        self.board[row][col] = value
+        
     def set_row_segments(self, row_segments):
         self.row_segments = row_segments
         
@@ -22,8 +45,10 @@ class PicrossBoard:
         self.col_segments = col_segments
         
     def set_state(self, state):
-        self.board = state
-    
+        """Set the entire state of the board to a particular value."""
+        
+        self.board = state        
+        
     def solved(self):
         """Return whether the picross board is solved."""
         
@@ -48,44 +73,48 @@ class PicrossBoard:
         else:
             random.seed()
             
-        board = self._generate_blank_board()
+        self.board = self._generate_blank_board()
         for row in range(self.size):
             for col in range(self.size):
                 if random.random() >= 0.5:
-                    board[row][col] = 1
+                    self.board[row][col] = 1
                 else:
-                    board[row][col] = 0
+                    self.board[row][col] = 0
                     
         self.col_segments = self._generate_column_segments()
         self.row_segments = self._generate_row_segments()
         
-        return board
+        return self.board
+    
+    def _key_check(self, key):
         
+        if key < 0 or key >= self.size:
+            raise IndexError('Board rows and cols must be between 0 and {self.size - 1}')
+            
     def _generate_column_segments(self):
         
         col_segments = []
         
-        row = 0
         for col in range(self.size):
+            row = 0
             this_col = []
             while row < self.size:
                 if self.board[row][col] != 0:
-                    length, col = self._traverse_col_segment(col, row)
+                    length, row = self._traverse_col_segment(col, row)
                     this_col.append(length)
                 row+=1
-            if len(col_segments) == 0:
+            if len(this_col) == 0:
                 this_col.append(0)
             col_segments.append(this_col)
             
         return col_segments
         
-        
     def _generate_row_segments(self):
         
         row_segments = []
         
-        col = 0
         for row in range(self.size):
+            col = 0
             this_row = []
             while col < self.size:
                 if self.board[row][col] != 0:
@@ -94,7 +123,7 @@ class PicrossBoard:
                 col+=1
             if len(this_row)==0:
                 this_row.append(0)
-            row_segments.append(0)
+            row_segments.append(this_row)
             
         return row_segments
     
