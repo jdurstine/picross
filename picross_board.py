@@ -46,7 +46,19 @@ class PicrossBoard:
         
     def set_state(self, state):
         """Set the entire state of the board to a particular value."""
-        
+
+        if len(state) != self.size:
+            raise ValueError(f'Board must have {self.size} rows.')
+            
+        for row in state:
+            if len(row) != self.size:
+                raise ValueError(f'Board must have {self.size} columns.')
+                
+        for row in range(self.size):
+            for col in range(self.size):
+                if state[row][col] not in [-1, 0, 1]:
+                    raise ValueError('Board cell must be one of -1, 0, or 1.')
+                    
         self.board = state        
         
     def solved(self):
@@ -147,7 +159,9 @@ class PicrossBoard:
             if cur_segment >= len(self.row_segments[row]):
                 if length != 0:
                     return False
-            else:
+            elif length == 0:
+                pass
+            elif length != 0:
                 if length != self.row_segments[row][cur_segment]:
                     return False
                 if self.row_segments[row][cur_segment] != 0:
@@ -180,15 +194,17 @@ class PicrossBoard:
         index = 0
         
         while index < self.size:
-            length, last_index = self._traverse_row_segment(col, index)
+            length, last_index = self._traverse_col_segment(col, index)
             if cur_segment >= len(self.col_segments[col]):
                 if length !=0:
                     return False
-            else:
+            elif length == 0:
+                pass
+            elif length != 0:
                 if length != self.col_segments[col][cur_segment]:
                     return False
                 if self.col_segments[col][cur_segment] != 0:
-                    cur_segment += 1
+                    cur_segment += 1 
             index = last_index + 1
 
         return True
