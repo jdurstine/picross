@@ -1,9 +1,9 @@
 import pytest
 from picross_board import PicrossBoard
 
-parameters = 'size, seed, row_segments, col_segments, solution, solved'
+parameters = 'size, seed, row_definitions, col_definitions, solution, solved'
 testdata = [
-        # size, seed, row_segments, col_segments, solution, solved
+        # size, seed, row_definitions, col_definitions, solution, solved
         (2, None, [[1], [0]], [[1], [0]], [[1, 0], [0, 0]], True),
         (2, 0, [[2], [0]], [[1], [1]], [[1, 1], [0, 0]], True),
         (4,
@@ -21,7 +21,7 @@ class TestPicrossBoard:
 
     @pytest.mark.parametrize(parameters, testdata) 
     def test_solution_solved(self, size, seed,
-                             row_segments, col_segments,
+                             row_definitions, col_definitions,
                              solution, solved):
         
         if solved is None or solution is None:
@@ -30,8 +30,8 @@ class TestPicrossBoard:
         
         board = PicrossBoard(size)     
         
-        board.set_row_segments(row_segments)
-        board.set_col_segments(col_segments)
+        board.set_row_definitions(row_definitions)
+        board.set_col_definitions(col_definitions)
         
         board.set_state(solution)
         
@@ -39,7 +39,7 @@ class TestPicrossBoard:
 
     @pytest.mark.parametrize(parameters, testdata)    
     def test_generate_valid_puzzle(self, size, seed,
-                                   row_segments, col_segments,
+                                   row_definitions, col_definitions,
                                    solution, solved):
         
         if seed is None:
@@ -48,6 +48,6 @@ class TestPicrossBoard:
         board = PicrossBoard(size)
         state = board.generate_valid_puzzle(seed)
        
-        assert board.row_segments == row_segments
-        assert board.col_segments == col_segments
+        assert board.row_definitions == row_definitions
+        assert board.col_definitions == col_definitions
         assert state == solution

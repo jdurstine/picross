@@ -6,14 +6,14 @@ class PicrossBoard:
         
         self.size = size
         self.board = self._generate_blank_board()
-        self.row_segments = None
-        self.col_segments = None
+        self.row_definitions = None
+        self.col_definitions = None
         
-        if 'row_segment' in kwargs.keys():
-            self.row_segments = kwargs['row_segments']
+        if 'row_definitions' in kwargs.keys():
+            self.row_definitions = kwargs['row_definitions']
             
-        if 'col_segments' in kwargs.keys():
-            self.col_segments = kwargs['col_segments']
+        if 'col_definitions' in kwargs.keys():
+            self.col_definitions = kwargs['col_definitions']
             
     def __getitem__(self, key):
         
@@ -38,11 +38,11 @@ class PicrossBoard:
             
         self.board[row][col] = value
         
-    def set_row_segments(self, row_segments):
-        self.row_segments = row_segments
+    def set_row_definitions(self, row_definitions):
+        self.row_definitions = row_definitions
         
-    def set_col_segments(self, col_segments):
-        self.col_segments = col_segments
+    def set_col_definitions(self, col_definitions):
+        self.col_definitions = col_definitions
         
     def set_state(self, state):
         """Set the entire state of the board to a particular value."""
@@ -64,8 +64,8 @@ class PicrossBoard:
     def solved(self):
         """Return whether the picross board is solved."""
         
-        if self.row_segments is None or self.col_segments is None:
-            raise RuntimeError("Segments must be defined for columns and rows.")
+        if self.row_definitions is None or self.col_definitions is None:
+            raise RuntimeError("Definitions must be defined for columns and rows.")
         
         for row in range(self.size):
             if not self._solved('row', row):
@@ -93,8 +93,8 @@ class PicrossBoard:
                 else:
                     self.board[row][col] = 0
                     
-        self.col_segments = self._generate_segments('col')
-        self.row_segments = self._generate_segments('row')
+        self.col_definitions = self._generate_definitions('col')
+        self.row_definitions = self._generate_definitions('row')
         
         return self.board
     
@@ -107,10 +107,10 @@ class PicrossBoard:
         
         if axis == 'row':
             array = self.board[index]
-            segments = self.row_segments[index]
+            segments = self.row_definitions[index]
         elif axis == 'col':
             array = [self.board[row][index] for row in range(self.size)]
-            segments = self.col_segments[index]
+            segments = self.col_definitions[index]
         else:
             raise ValueError('axis must be either "row" or "col"')
             
@@ -133,37 +133,37 @@ class PicrossBoard:
 
         return True
     
-    def _generate_segments(self, axis):
+    def _generate_definitions(self, axis):
         
-        segments = []
+        definitions = []
         
         if axis == 'row':
             for row in range(self.size):
                 array = self.board[row]
-                segments.append(self._generate_definition(array))
+                definitions.append(self._generate_definition(array))
         elif axis == 'col':
             for col in range(self.size):
                 array = [self.board[row][col] for row in range(self.size)]
-                segments.append(self._generate_definition(array))    
+                definitions.append(self._generate_definition(array))    
         else:
             raise ValueError('axis must be either "row" or "col"')
             
-        return segments
+        return definitions
     
     def _generate_definition(self, array):
             
-        this_arrays_definition = []
+        definitions_segments = []
         
         index = 0
         while index < len(array):
             if array[index] != 0:
                 length, index = self._traverse_segment(array, index)
-                this_arrays_definition.append(length)
+                definitions_segments.append(length)
             index+=1
-        if len(this_arrays_definition) == 0:
-            this_arrays_definition.append(0)
+        if len(definitions_segments) == 0:
+            definitions_segments.append(0)
             
-        return this_arrays_definition
+        return definitions_segments
     
     def _traverse_segment(self, array, starting_index):
         
