@@ -68,11 +68,11 @@ class PicrossBoard:
             raise RuntimeError("Segments must be defined for columns and rows.")
         
         for row in range(self.size):
-            if not self._row_solved(row):
+            if not self._solved('row', row):
                 return False
         
         for col in range(self.size):
-            if not self._col_solved(col):
+            if not self._solved('col', col):
                 return False
         
         return True
@@ -102,6 +102,52 @@ class PicrossBoard:
         
         if key < 0 or key >= self.size:
             raise IndexError('Board rows and cols must be between 0 and {self.size - 1}')
+            
+    def _solved(self, axis, index):
+        
+        if axis == 'row':
+            array = self.board[index]
+            segments = self.row_segments[index]
+        elif axis == 'col':
+            array = [self.board[row][index] for row in range(self.size)]
+            segments = self.col_segments[index]
+        else:
+            raise ValueError('axis must be either "row" or "col"')
+            
+        cur_segment = 0
+        i = 0
+        
+        while i < self.size:
+            length, prev_i = self._traverse_segment(array, i)
+            if cur_segment >= len(segments):
+                if length != 0:
+                    return False
+            elif length == 0:
+                pass
+            elif length != 0:
+                if length != segments[cur_segment]:
+                    return False
+                if segments[cur_segment] != 0:
+                    cur_segment += 1
+            i = prev_i + 1
+
+        return True
+    
+    def _traverse_segment(self, array, starting_index):
+        
+        index = starting_index
+        length = 0
+        
+        if array[index] == 0:
+            return (length, index)
+        
+        while array[index] != 0:
+            length += 1
+            index += 1
+            if index >= self.size:
+                break
+            
+        return (length, index - 1)
             
     def _generate_column_segments(self):
         
