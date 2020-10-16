@@ -93,8 +93,8 @@ class PicrossBoard:
                 else:
                     self.board[row][col] = 0
                     
-        self.col_segments = self._generate_column_segments()
-        self.row_segments = self._generate_row_segments()
+        self.col_segments = self._generate_segments('col')
+        self.row_segments = self._generate_segments('row')
         
         return self.board
     
@@ -133,6 +133,38 @@ class PicrossBoard:
 
         return True
     
+    def _generate_segments(self, axis):
+        
+        segments = []
+        
+        if axis == 'row':
+            for row in range(self.size):
+                array = self.board[row]
+                segments.append(self._generate_definition(array))
+        elif axis == 'col':
+            for col in range(self.size):
+                array = [self.board[row][col] for row in range(self.size)]
+                segments.append(self._generate_definition(array))    
+        else:
+            raise ValueError('axis must be either "row" or "col"')
+            
+        return segments
+    
+    def _generate_definition(self, array):
+            
+        this_arrays_definition = []
+        
+        index = 0
+        while index < len(array):
+            if array[index] != 0:
+                length, index = self._traverse_segment(array, index)
+                this_arrays_definition.append(length)
+            index+=1
+        if len(this_arrays_definition) == 0:
+            this_arrays_definition.append(0)
+            
+        return this_arrays_definition
+    
     def _traverse_segment(self, array, starting_index):
         
         index = starting_index
@@ -149,42 +181,6 @@ class PicrossBoard:
             
         return (length, index - 1)
             
-    def _generate_column_segments(self):
-        
-        col_segments = []
-        
-        for col in range(self.size):
-            row = 0
-            this_col = []
-            while row < self.size:
-                if self.board[row][col] != 0:
-                    length, row = self._traverse_col_segment(col, row)
-                    this_col.append(length)
-                row+=1
-            if len(this_col) == 0:
-                this_col.append(0)
-            col_segments.append(this_col)
-            
-        return col_segments
-        
-    def _generate_row_segments(self):
-        
-        row_segments = []
-        
-        for row in range(self.size):
-            col = 0
-            this_row = []
-            while col < self.size:
-                if self.board[row][col] != 0:
-                    length, col = self._traverse_row_segment(row, col)
-                    this_row.append(length)
-                col+=1
-            if len(this_row)==0:
-                this_row.append(0)
-            row_segments.append(this_row)
-            
-        return row_segments
-    
     def _generate_blank_board(self):
         
         board = []
@@ -193,81 +189,3 @@ class PicrossBoard:
             board.append(row)
             
         return board
-        
-    def _row_solved(self, row):
-        """Check to see if a given row is solved based on the rows segments."""
-        
-        cur_segment = 0
-        index = 0
-        
-        while index < self.size:
-            length, last_index = self._traverse_row_segment(row, index)
-            if cur_segment >= len(self.row_segments[row]):
-                if length != 0:
-                    return False
-            elif length == 0:
-                pass
-            elif length != 0:
-                if length != self.row_segments[row][cur_segment]:
-                    return False
-                if self.row_segments[row][cur_segment] != 0:
-                    cur_segment += 1
-            index = last_index + 1
-
-        return True
-                
-    def _traverse_row_segment(self, row, starting_index):
-        """Return the size of a segment and the last index checked."""
-        
-        index = starting_index
-        length = 0
-        
-        if self.board[row][index] == 0:
-            return (length, index)
-        
-        while self.board[row][index] != 0:
-            length += 1
-            index += 1
-            if index >= self.size:
-                break
-            
-        return (length, index - 1)
-    
-    def _col_solved(self, col):        
-        """Check to see if a given row is solved based on the rows segments."""
-        
-        cur_segment = 0
-        index = 0
-        
-        while index < self.size:
-            length, last_index = self._traverse_col_segment(col, index)
-            if cur_segment >= len(self.col_segments[col]):
-                if length !=0:
-                    return False
-            elif length == 0:
-                pass
-            elif length != 0:
-                if length != self.col_segments[col][cur_segment]:
-                    return False
-                if self.col_segments[col][cur_segment] != 0:
-                    cur_segment += 1 
-            index = last_index + 1
-
-        return True
-        
-    def _traverse_col_segment(self, col, starting_index):
-        """Return the size of a segment and the last index checked."""
-        
-        index = starting_index
-        length = 0
-        
-        if self.board[index][col] == 0:
-            return (length, index)
-        
-        while self.board[index][col] != 0:
-            length += 1
-            index += 1
-            if index >= self.size:
-                break
-            
-        return (length, index - 1)
